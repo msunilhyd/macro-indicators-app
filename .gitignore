@@ -19,6 +19,7 @@ backend/.env
 # Database
 *.db
 *.sqlite3
+!backend/macro_indicators.db
 
 # IDE
 .idea/
