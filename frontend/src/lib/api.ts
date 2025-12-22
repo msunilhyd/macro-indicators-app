@@ -1,7 +1,5 @@
-// For server-side rendering, we need the full URL to the backend
-const API_BASE = typeof window === 'undefined' 
-  ? 'http://localhost:8000'  // Server-side: direct to backend
-  : '';  // Client-side: use Next.js proxy
+// API base URL - uses environment variable or defaults to localhost
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export interface Category {
   id: number;
