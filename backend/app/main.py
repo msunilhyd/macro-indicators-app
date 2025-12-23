@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routers import categories, indicators, dashboard
+from .routers import categories, indicators, dashboard, admin
 from .config import get_settings
 
 settings = get_settings()
@@ -36,6 +36,7 @@ app.add_middleware(
 app.include_router(categories.router)
 app.include_router(indicators.router)
 app.include_router(dashboard.router)
+app.include_router(admin.router)
 
 
 @app.get("/")

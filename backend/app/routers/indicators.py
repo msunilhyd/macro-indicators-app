@@ -35,7 +35,7 @@ def get_indicator(
     slug: str,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
-    limit: int = Query(default=100, le=5000),
+    limit: int = Query(default=None, le=50000),
     db: Session = Depends(get_db)
 ):
     indicator = db.query(Indicator).filter(Indicator.slug == slug).first()
@@ -61,8 +61,19 @@ def get_indicator(
     
     # Build series list
     series_list = []
+    # First add standard series types in order
     for series_type in ["historical", "inflation_adjusted", "annual_change", "annual_average"]:
         if series_type in series_dict:
+            points = series_dict[series_type][-limit:] if limit else series_dict[series_type]
+            series_list.append(DataSeries(
+                series_type=series_type,
+                label=SERIES_LABELS.get(series_type, series_type.replace("_", " ").title()),
+                data_points=[DataPointBase(date=dp.date, value=dp.value) for dp in points]
+            ))
+    
+    # Then add any custom series types
+    for series_type in series_dict.keys():
+        if series_type not in ["historical", "inflation_adjusted", "annual_change", "annual_average"]:
             points = series_dict[series_type][-limit:] if limit else series_dict[series_type]
             series_list.append(DataSeries(
                 series_type=series_type,

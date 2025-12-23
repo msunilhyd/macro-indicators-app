@@ -75,7 +75,16 @@ export default function ChartWithFilters({ data, name, unit, series = [] }: Char
   }, [currentSeriesData, selectedRange]);
 
   const chartData = useMemo(() => {
-    return filteredData.map((dp) => ({
+    // For very large datasets (>5000 points), downsample for performance
+    let dataToChart = filteredData;
+    
+    if (filteredData.length > 5000) {
+      // Keep every nth point to reduce to ~2000 points
+      const step = Math.ceil(filteredData.length / 2000);
+      dataToChart = filteredData.filter((_, index) => index % step === 0 || index === filteredData.length - 1);
+    }
+    
+    return dataToChart.map((dp) => ({
       date: new Date(dp.date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -158,7 +167,7 @@ export default function ChartWithFilters({ data, name, unit, series = [] }: Char
               tick={{ fontSize: 12 }}
               tickLine={false}
               axisLine={{ stroke: '#e5e7eb' }}
-              interval="preserveStartEnd"
+              minTickGap={50}
             />
             <YAxis
               tickFormatter={formatYAxis}

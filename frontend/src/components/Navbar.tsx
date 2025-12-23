@@ -38,6 +38,12 @@ export default function Navbar() {
                 {cat.name}
               </Link>
             ))}
+            <Link
+              href="/admin"
+              className="ml-4 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors border-l border-gray-200"
+            >
+              Admin
+            </Link>
           </div>
 
           <div className="md:hidden flex items-center">

@@ -88,12 +88,6 @@ export default async function IndicatorPage({ params }: PageProps) {
             </p>
             <p className="text-sm text-gray-500 mt-1">{indicator.frequency}</p>
           </div>
-
-          <div className="bg-white rounded-lg shadow px-6 py-4">
-            <p className="text-sm text-gray-500 mb-1">Source</p>
-            <p className="text-xl font-semibold text-gray-900">{indicator.source}</p>
-            <p className="text-sm text-gray-500 mt-1">Unit: {indicator.unit || 'N/A'}</p>
-          </div>
         </div>
       </div>
 
