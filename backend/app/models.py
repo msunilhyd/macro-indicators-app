@@ -26,7 +26,7 @@ class Indicator(Base):
     slug = Column(String(200), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
     unit = Column(String(50), nullable=True)  # e.g., "USD", "%", "Index"
-    source = Column(String(100), default="MacroTrends")
+    source = Column(String(100), default="")
     frequency = Column(String(20), default="monthly")  # daily, monthly, yearly
     display_order = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())

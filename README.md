@@ -89,7 +89,7 @@ npm run dev
 
 ## Data Source
 
-The data comes from the `macrotrends_data_v2` folder containing:
+The data comes from the `data` folder containing:
 - **Market Indexes**: S&P 500, Dow Jones, NASDAQ, international indexes
 - **Precious Metals**: Gold, Silver, Platinum prices
 - **Energy**: Oil, Natural Gas prices

@@ -71,15 +71,6 @@ export default function AdminLogin() {
             ← Back to Home
           </a>
         </div>
-        
-        <div className="mt-8 p-4 bg-gray-50 rounded-md">
-          <p className="text-xs text-gray-600">
-            <strong>Default Token:</strong> admin_secret_token_2025
-          </p>
-          <p className="text-xs text-gray-500 mt-2">
-            (Change this in production!)
-          </p>
-        </div>
       </div>
     </div>
   );

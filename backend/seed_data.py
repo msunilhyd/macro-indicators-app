@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to seed the database with CSV data from macrotrends_organized
+Script to seed the database with CSV data
 """
 import os
 import sys
@@ -17,7 +17,7 @@ from app.database import SessionLocal, engine, Base
 from app.models import Category, Indicator, DataPoint, SERIES_TYPE_MAP
 
 # Path to the data folder - Update this path to point to your local data directory
-DATA_DIR = Path(os.environ.get("MACRO_DATA_DIR", str(Path(__file__).parent / "data" / "macrotrends_organized")))
+DATA_DIR = Path(os.environ.get("MACRO_DATA_DIR", str(Path(__file__).parent / "data" / "organized")))
 
 # Category mappings
 CATEGORIES = {
@@ -236,7 +236,7 @@ def seed_database():
                     name=first_info['display_name'],
                     slug=slug,
                     unit=guess_unit(first_info['display_name']),
-                    source="MacroTrends",
+                    source="",
                     frequency="monthly",
                     display_order=indicator_order
                 )

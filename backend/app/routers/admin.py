@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from typing import List, Optional
@@ -81,11 +81,15 @@ def get_admin_stats(
 async def upload_csv(
     indicator_slug: str,
     file: UploadFile = File(...),
-    series_type: str = Query("historical"),
-    admin_token: str = Depends(verify_admin_token),
+    series_type: str = Form("historical"),
+    admin_token: str = Form(...),
     db: Session = Depends(get_db)
 ):
     """Upload CSV data for an existing indicator"""
+    # Verify admin token
+    if admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Invalid admin token")
+    
     # Find the indicator
     indicator = db.query(Indicator).filter(Indicator.slug == indicator_slug).first()
     if not indicator:
@@ -153,27 +157,33 @@ async def upload_csv(
 
 @router.post("/create-indicator-from-csv")
 async def create_indicator_from_csv(
-    name: str = Query(...),
-    slug: str = Query(...),
-    category: str = Query(...),
-    description: str = Query(""),
-    unit: str = Query(""),
-    frequency: str = Query("daily"),
-    admin_token: str = Depends(verify_admin_token),
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    slug: str = Form(...),
+    category_slug: str = Form(...),
+    description: str = Form(""),
+    unit: str = Form(""),
+    frequency: str = Form("daily"),
+    series_type: str = Form("historical"),
+    admin_token: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    """Create a new indicator (without uploading data yet)"""
+    """Create a new indicator and upload initial CSV data"""
+    # Verify admin token
+    if admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Invalid admin token")
+    
     # Check if slug already exists
     existing = db.query(Indicator).filter(Indicator.slug == slug).first()
     if existing:
         raise HTTPException(status_code=400, detail="Indicator with this slug already exists")
     
     # Get or create category
-    category_obj = db.query(Category).filter(Category.slug == category).first()
+    category_obj = db.query(Category).filter(Category.slug == category_slug).first()
     if not category_obj:
         # Create category if it doesn't exist
-        category_name = category.replace('-', ' ').title()
-        category_obj = Category(name=category_name, slug=category)
+        category_name = category_slug.replace('-', ' ').title()
+        category_obj = Category(name=category_name, slug=category_slug)
         db.add(category_obj)
         db.flush()
     
@@ -187,16 +197,57 @@ async def create_indicator_from_csv(
         frequency=frequency
     )
     db.add(indicator)
+    db.flush()
+    
+    # Read and process the CSV file
+    contents = await file.read()
+    try:
+        df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error reading CSV: {str(e)}")
+    
+    # Validate required columns
+    if 'date' not in df.columns or 'value' not in df.columns:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="CSV must contain 'date' and 'value' columns"
+        )
+    
+    # Process and insert data
+    added_count = 0
+    
+    for _, row in df.iterrows():
+        try:
+            # Parse date
+            date_obj = pd.to_datetime(row['date']).date()
+            value = float(row['value'])
+            
+            data_point = DataPoint(
+                indicator_id=indicator.id,
+                date=date_obj,
+                value=value,
+                series_type=series_type
+            )
+            db.add(data_point)
+            added_count += 1
+        except Exception as e:
+            # Skip rows with errors
+            continue
+    
     db.commit()
     db.refresh(indicator)
     
     return {
-        "message": "Indicator created successfully",
+        "message": "Indicator created successfully with data",
         "indicator": {
             "id": indicator.id,
             "name": indicator.name,
             "slug": indicator.slug
-        }
+        },
+        "data_added": added_count,
+        "series_type": series_type
     }
 
 
