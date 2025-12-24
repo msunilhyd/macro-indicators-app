@@ -599,11 +599,10 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Multiple File Uploads Section */}
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center mb-4">
                   <label className="block text-sm font-medium text-gray-700">
-                    CSV Files (must have 'date' and 'value' columns) *
+                    CSV Files (must have &apos;date&apos; and &apos;value&apos; columns) *
                   </label>
                   <button
                     type="button"
@@ -862,7 +861,7 @@ export default function AdminDashboard() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      CSV File (must have 'date' and 'value' columns)
+                      CSV File (must have &apos;date&apos; and &apos;value&apos; columns)
                     </label>
                     <input
                       type="file"
