@@ -301,6 +301,8 @@ export default function AdminDashboard() {
           description: '',
           unit: 'Index',
           frequency: 'daily',
+          scrape_url: '',
+          html_selector: '',
         });
       }, 3000);
     } catch (error) {
