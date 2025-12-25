@@ -43,6 +43,8 @@ export default function AdminDashboard() {
     description: '',
     unit: 'Index',
     frequency: 'daily',
+    scrape_url: '',
+    html_selector: '',
   });
   
   // Multiple file uploads for new indicator
@@ -60,7 +62,9 @@ export default function AdminDashboard() {
     description: '',
     unit: '',
     frequency: 'daily',
-    source: ''
+    source: '',
+    scrape_url: '',
+    html_selector: ''
   });
   
   const router = useRouter();
@@ -223,6 +227,8 @@ export default function AdminDashboard() {
       formData.append('description', newIndicator.description);
       formData.append('unit', newIndicator.unit);
       formData.append('frequency', newIndicator.frequency);
+      formData.append('scrape_url', newIndicator.scrape_url);
+      formData.append('html_selector', newIndicator.html_selector);
       const firstSeriesType = firstUpload.series_type === 'other' ? firstUpload.custom_series_type : firstUpload.series_type;
       formData.append('series_type', firstSeriesType);
       formData.append('admin_token', token || '');
@@ -334,7 +340,7 @@ export default function AdminDashboard() {
     
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/indicators/${slug}?admin_token=${token}&name=${encodeURIComponent(editForm.name)}&description=${encodeURIComponent(editForm.description)}&unit=${encodeURIComponent(editForm.unit)}&frequency=${editForm.frequency}&source=${encodeURIComponent(editForm.source)}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/indicators/${slug}?admin_token=${token}&name=${encodeURIComponent(editForm.name)}&description=${encodeURIComponent(editForm.description)}&unit=${encodeURIComponent(editForm.unit)}&frequency=${editForm.frequency}&source=${encodeURIComponent(editForm.source)}&scrape_url=${encodeURIComponent(editForm.scrape_url)}&html_selector=${encodeURIComponent(editForm.html_selector)}`,
         { method: 'PUT' }
       );
       
@@ -359,7 +365,9 @@ export default function AdminDashboard() {
       description: '',
       unit: '',
       frequency: 'daily',
-      source: ''
+      source: '',
+      scrape_url: '',
+      html_selector: ''
     });
     setShowUpload(false);
     setShowCreateNew(false);
@@ -595,6 +603,32 @@ export default function AdminDashboard() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-md"
                     rows={3}
                     placeholder="Brief description of the indicator..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Scrape URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newIndicator.scrape_url}
+                    onChange={(e) => setNewIndicator({...newIndicator, scrape_url: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="Link to scrape the rate value"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    HTML Selector
+                  </label>
+                  <input
+                    type="text"
+                    value={newIndicator.html_selector}
+                    onChange={(e) => setNewIndicator({...newIndicator, html_selector: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="HTML div"
                   />
                 </div>
               </div>
@@ -1001,6 +1035,20 @@ export default function AdminDashboard() {
                             onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
                             className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
                             placeholder="Unit"
+                          />
+                          <input
+                            type="url"
+                            value={editForm.scrape_url}
+                            onChange={(e) => setEditForm({...editForm, scrape_url: e.target.value})}
+                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                            placeholder="Link to scrape the rate value"
+                          />
+                          <input
+                            type="text"
+                            value={editForm.html_selector}
+                            onChange={(e) => setEditForm({...editForm, html_selector: e.target.value})}
+                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                            placeholder="HTML div"
                           />
                           <select
                             value={editForm.frequency}

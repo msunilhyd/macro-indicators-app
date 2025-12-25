@@ -21,6 +21,8 @@ class IndicatorBase(BaseModel):
     description: Optional[str] = None
     unit: Optional[str] = None
     frequency: str = "monthly"
+    scrape_url: Optional[str] = None
+    html_selector: Optional[str] = None
 
 
 class IndicatorSummary(BaseModel):
@@ -41,6 +43,8 @@ class IndicatorResponse(IndicatorBase):
     id: int
     category_id: int
     source: str
+    scrape_url: Optional[str] = None
+    html_selector: Optional[str] = None
     
     class Config:
         from_attributes = True

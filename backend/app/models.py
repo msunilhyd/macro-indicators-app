@@ -27,6 +27,8 @@ class Indicator(Base):
     description = Column(Text, nullable=True)
     unit = Column(String(50), nullable=True)  # e.g., "USD", "%", "Index"
     source = Column(String(100), default="")
+    scrape_url = Column(String(500), nullable=True)  # URL to scrape data from
+    html_selector = Column(String(200), nullable=True)  # CSS selector or HTML element to extract data
     frequency = Column(String(20), default="monthly")  # daily, monthly, yearly
     display_order = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
