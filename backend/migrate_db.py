@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
 Database migration script to add scrape_url and html_selector columns to indicators table
+Usage:
+  python migrate_db.py                    # Use local database
+  DATABASE_URL="postgresql://..." python migrate_db.py  # Use custom database
 """
 
 import sys
@@ -10,16 +13,31 @@ from dotenv import load_dotenv
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Load the local environment file
+# Load the local environment file by default
 load_dotenv('.env.local')
 
-from sqlalchemy import text
-from app.database import engine
+from sqlalchemy import text, create_engine
 from app.models import Base
+
+def get_database_engine():
+    """Get database engine, prioritizing DATABASE_URL env var"""
+    database_url = os.getenv('DATABASE_URL')
+    
+    if not database_url:
+        print("❌ DATABASE_URL not found in environment")
+        print("💡 Usage:")
+        print("   For local: python migrate_db.py")
+        print("   For prod:  DATABASE_URL='postgresql://...' python migrate_db.py")
+        sys.exit(1)
+    
+    print(f"🔗 Using database: {database_url.split('@')[0]}@***")
+    return create_engine(database_url)
 
 def migrate_database():
     """Add new columns to indicators table"""
     print("Starting database migration...")
+    
+    engine = get_database_engine()
     
     with engine.connect() as connection:
         try:
