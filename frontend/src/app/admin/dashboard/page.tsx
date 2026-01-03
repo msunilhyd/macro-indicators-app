@@ -766,6 +766,19 @@ export default function AdminDashboard() {
                     setSelectedIndicator(e.target.value);
                     if (e.target.value) {
                       loadIndicatorSeries(e.target.value);
+                      // Load indicator metadata for editing
+                      const indicator = stats?.indicators.find(ind => ind.slug === e.target.value);
+                      if (indicator) {
+                        setEditForm({
+                          name: indicator.name,
+                          description: '',
+                          unit: '',
+                          frequency: 'daily',
+                          source: '',
+                          scrape_url: '',
+                          html_selector: ''
+                        });
+                      }
                     } else {
                       setSelectedIndicatorSeries([]);
                     }
@@ -804,37 +817,77 @@ export default function AdminDashboard() {
 
               {selectedIndicator && (
                 <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Action
-                    </label>
-                    <div className="space-y-2">
-                      <label className="flex items-center">
+                  {/* Metadata Edit Section */}
+                  <div className="bg-gray-50 border border-gray-300 rounded-md p-4 space-y-3">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-2">📝 Edit Indicator Metadata</h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Scrape URL</label>
                         <input
-                          type="radio"
-                          checked={isNewSeries}
-                          onChange={() => {
-                            setIsNewSeries(true);
-                            setUploadSeriesType('historical');
-                          }}
-                          className="mr-2"
+                          type="url"
+                          value={editForm.scrape_url}
+                          onChange={(e) => setEditForm({...editForm, scrape_url: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder="https://example.com/gold-price"
                         />
-                        <span className="text-sm">Add a new series type</span>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">HTML Selector</label>
+                        <input
+                          type="text"
+                          value={editForm.html_selector}
+                          onChange={(e) => setEditForm({...editForm, html_selector: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          placeholder=".price-value or [data-test='price']"
+                        />
+                      </div>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(selectedIndicator)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                    >
+                      Save Metadata
+                    </button>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-3">📊 Update Data Series</h4>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Action
                       </label>
-                      {selectedIndicatorSeries.length > 0 && (
+                      <div className="space-y-2">
                         <label className="flex items-center">
                           <input
                             type="radio"
-                            checked={!isNewSeries}
+                            checked={isNewSeries}
                             onChange={() => {
-                              setIsNewSeries(false);
-                              setUploadSeriesType(selectedIndicatorSeries[0]?.series_type || 'historical');
+                              setIsNewSeries(true);
+                              setUploadSeriesType('historical');
                             }}
                             className="mr-2"
                           />
-                          <span className="text-sm">Update an existing series type (replace data)</span>
+                          <span className="text-sm">Add a new series type</span>
                         </label>
-                      )}
+                        {selectedIndicatorSeries.length > 0 && (
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              checked={!isNewSeries}
+                              onChange={() => {
+                                setIsNewSeries(false);
+                                setUploadSeriesType(selectedIndicatorSeries[0]?.series_type || 'historical');
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-sm">Update an existing series type (replace data)</span>
+                          </label>
+                        )}
+                      </div>
                     </div>
                   </div>
 
