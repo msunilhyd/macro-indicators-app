@@ -36,9 +36,9 @@ def get_admin_stats(
     total_indicators = db.query(func.count(Indicator.id)).scalar()
     total_data_points = db.query(func.count(DataPoint.id)).scalar()
     
-    # Get all categories
-    categories = db.query(Category.name).all()
-    category_names = [cat.name for cat in categories]
+    # Get all categories (return slugs for form usage)
+    categories = db.query(Category.slug).all()
+    category_slugs = [cat.slug for cat in categories]
     
     # Get all indicators with details
     indicators = db.query(Indicator).all()
@@ -75,7 +75,7 @@ def get_admin_stats(
         "total_categories": total_categories,
         "total_indicators": total_indicators,
         "total_data_points": total_data_points,
-        "categories": category_names,
+        "categories": category_slugs,
         "indicators": indicator_list,
     }
 
@@ -183,12 +183,13 @@ async def create_indicator_from_csv(
     if existing:
         raise HTTPException(status_code=400, detail="Indicator with this slug already exists")
     
-    # Get or create category
-    category_obj = db.query(Category).filter(Category.slug == category_slug).first()
+    # Get or create category (normalize slug to lowercase for consistency)
+    category_slug_normalized = category_slug.lower()
+    category_obj = db.query(Category).filter(Category.slug == category_slug_normalized).first()
     if not category_obj:
         # Create category if it doesn't exist
-        category_name = category_slug.replace('-', ' ').title()
-        category_obj = Category(name=category_name, slug=category_slug)
+        category_name = category_slug_normalized.replace('-', ' ').title()
+        category_obj = Category(name=category_name, slug=category_slug_normalized)
         db.add(category_obj)
         db.flush()
     

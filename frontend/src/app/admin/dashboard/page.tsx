@@ -998,7 +998,10 @@ export default function AdminDashboard() {
                     Data Points
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date Range
+                    Details / Edit
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -1023,49 +1026,91 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {editingIndicator === indicator.slug ? (
-                        <div className="space-y-2">
-                          <input
-                            type="text"
-                            value={editForm.description}
-                            onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                            placeholder="Description"
-                          />
-                          <input
-                            type="text"
-                            value={editForm.unit}
-                            onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                            placeholder="Unit"
-                          />
-                          <input
-                            type="url"
-                            value={editForm.scrape_url}
-                            onChange={(e) => setEditForm({...editForm, scrape_url: e.target.value})}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                            placeholder="Link to scrape the rate value"
-                          />
-                          <input
-                            type="text"
-                            value={editForm.html_selector}
-                            onChange={(e) => setEditForm({...editForm, html_selector: e.target.value})}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                            placeholder="HTML div"
-                          />
-                          <select
-                            value={editForm.frequency}
-                            onChange={(e) => setEditForm({...editForm, frequency: e.target.value})}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
-                          >
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="quarterly">Quarterly</option>
-                            <option value="yearly">Yearly</option>
-                          </select>
+                        <div className="space-y-3 min-w-[300px]">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                            <input
+                              type="text"
+                              value={editForm.description}
+                              onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              placeholder="Description"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+                            <input
+                              type="text"
+                              value={editForm.unit}
+                              onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              placeholder="Unit (e.g., USD, Index, %)"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Scrape URL</label>
+                            <input
+                              type="url"
+                              value={editForm.scrape_url}
+                              onChange={(e) => setEditForm({...editForm, scrape_url: e.target.value})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              placeholder="https://example.com/gold-price"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">HTML Selector</label>
+                            <input
+                              type="text"
+                              value={editForm.html_selector}
+                              onChange={(e) => setEditForm({...editForm, html_selector: e.target.value})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                              placeholder=".price-value or [data-test='price']"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Frequency</label>
+                            <select
+                              value={editForm.frequency}
+                              onChange={(e) => setEditForm({...editForm, frequency: e.target.value})}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                            >
+                              <option value="daily">Daily</option>
+                              <option value="weekly">Weekly</option>
+                              <option value="monthly">Monthly</option>
+                              <option value="quarterly">Quarterly</option>
+                              <option value="yearly">Yearly</option>
+                            </select>
+                          </div>
                         </div>
                       ) : (
-                        indicator.date_range || 'N/A'
+                        <div>
+                          <div className="text-xs text-gray-600">{indicator.date_range || 'No data'}</div>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {editingIndicator === indicator.slug ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(indicator.slug)}
+                            className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingIndicator(null)}
+                            className="bg-gray-400 text-white px-3 py-1 rounded text-xs hover:bg-gray-500"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => startEdit(indicator)}
+                          className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                        >
+                          Edit
+                        </button>
                       )}
                     </td>
                   </tr>
