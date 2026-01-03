@@ -6,6 +6,7 @@ from .database import Base
 
 class Category(Base):
     __tablename__ = "categories"
+    __table_args__ = {"schema": "macro_indicators"}
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
@@ -19,9 +20,10 @@ class Category(Base):
 
 class Indicator(Base):
     __tablename__ = "indicators"
+    __table_args__ = {"schema": "macro_indicators"}
     
     id = Column(Integer, primary_key=True, index=True)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("macro_indicators.categories.id"), nullable=False)
     name = Column(String(200), nullable=False)
     slug = Column(String(200), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
@@ -39,9 +41,10 @@ class Indicator(Base):
 
 class DataPoint(Base):
     __tablename__ = "data_points"
+    __table_args__ = {"schema": "macro_indicators"}
     
     id = Column(Integer, primary_key=True, index=True)
-    indicator_id = Column(Integer, ForeignKey("indicators.id"), nullable=False, index=True)
+    indicator_id = Column(Integer, ForeignKey("macro_indicators.indicators.id"), nullable=False, index=True)
     series_type = Column(String(50), nullable=False, default="historical", index=True)
     date = Column(Date, nullable=False, index=True)
     value = Column(Float, nullable=False)
