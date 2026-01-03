@@ -166,9 +166,11 @@ class DataCollectorScheduler:
                 final_value = scraped_value
                 result['source'] = 'scraped'
             else:
-                # Generate realistic value
-                final_value = self.generate_realistic_value(indicator.id, db)
-                result['source'] = 'generated'
+                # Skip indicators without scrape configuration
+                logger.warning(f"⏭️  {indicator.name}: No scrape URL configured, skipping auto-generation")
+                result['success'] = False
+                result['error'] = 'No scrape URL configured'
+                return result
             
             # Insert new data point
             new_data_point = DataPoint(
