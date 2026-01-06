@@ -1,0 +1,239 @@
+{
+  "name": "Market Indexes",
+  "slug": "market-indexes",
+  "description": "Major stock market indexes including S&P 500, Dow Jones, NASDAQ, and international markets",
+  "id": 1,
+  "display_order": 1,
+  "indicators": [
+    {
+      "id": 1,
+      "name": "Bovespa",
+      "slug": "bovespa",
+      "unit": "Value",
+      "latest_value": 127021.18,
+      "latest_date": "2025-12-30",
+      "previous_value": 12.35,
+      "change_percent": 1028411.58
+    },
+    {
+      "id": 2,
+      "name": "Cac 40",
+      "slug": "cac-40",
+      "unit": "Value",
+      "latest_value": 7786.2,
+      "latest_date": "2025-12-30",
+      "previous_value": 5.28,
+      "change_percent": 147365.91
+    },
+    {
+      "id": 3,
+      "name": "Dax 30",
+      "slug": "dax-30",
+      "unit": "Value",
+      "latest_value": 21788.41,
+      "latest_date": "2025-12-30",
+      "previous_value": 15.96,
+      "change_percent": 136418.86
+    },
+    {
+      "id": 4,
+      "name": "Dow Jones",
+      "slug": "dow-jones",
+      "unit": "Value",
+      "latest_value": 44134.47,
+      "latest_date": "2025-12-30",
+      "previous_value": 13.09,
+      "change_percent": 337061.73
+    },
+    {
+      "id": 5,
+      "name": "Hang Seng",
+      "slug": "hang-seng",
+      "unit": "Value",
+      "latest_value": 21853.46,
+      "latest_date": "2025-12-30",
+      "previous_value": 12.19,
+      "change_percent": 179173.67
+    },
+    {
+      "id": 6,
+      "name": "Nasdaq",
+      "slug": "nasdaq",
+      "unit": "Value",
+      "latest_value": 20372.16,
+      "latest_date": "2025-12-30",
+      "previous_value": 19.4,
+      "change_percent": 104911.13
+    },
+    {
+      "id": 7,
+      "name": "Nikkei 225",
+      "slug": "nikkei-225",
+      "unit": "Value",
+      "latest_value": 41436.8,
+      "latest_date": "2025-12-30",
+      "previous_value": 23.78,
+      "change_percent": 174150.63
+    },
+    {
+      "id": 8,
+      "name": "Shanghai Composite",
+      "slug": "shanghai-composite",
+      "unit": "Value",
+      "latest_value": 3302.42,
+      "latest_date": "2025-12-30",
+      "previous_value": -2.17,
+      "change_percent": 152285.25
+    },
+    {
+      "id": 9,
+      "name": "Sp500",
+      "slug": "sp500",
+      "unit": "Value",
+      "latest_value": 6189.95,
+      "latest_date": "2025-12-30",
+      "previous_value": 6189.95,
+      "change_percent": 0.0
+    },
+    {
+      "id": 10,
+      "name": "Vix",
+      "slug": "vix",
+      "unit": "Value",
+      "latest_value": 19.1,
+      "latest_date": "2025-12-30",
+      "previous_value": -4.9,
+      "change_percent": 489.8
+    },
+    {
+      "id": 68,
+      "name": "BSE Sensex",
+      "slug": "bse-sensex",
+      "unit": "Index",
+      "latest_value": 88009.79,
+      "latest_date": "2025-12-25",
+      "previous_value": 85567.48,
+      "change_percent": 2.85
+    },
+    {
+      "id": 69,
+      "name": "Nifty 50",
+      "slug": "nifty-50",
+      "unit": "Index",
+      "latest_value": 25891.26,
+      "latest_date": "2025-12-25",
+      "previous_value": 26172.4,
+      "change_percent": -1.07
+    },
+    {
+      "id": 70,
+      "name": "gold-test",
+      "slug": "gold-test",
+      "unit": "Index",
+      "latest_value": 27243.64,
+      "latest_date": "2025-12-25",
+      "previous_value": 27225.7,
+      "change_percent": 0.07
+    },
+    {
+      "id": 71,
+      "name": "Custom Series Test",
+      "slug": "custom-series-test",
+      "unit": "Points",
+      "latest_value": 27866.48,
+      "latest_date": "2025-12-25",
+      "previous_value": 27225.7,
+      "change_percent": 2.35
+    },
+    {
+      "id": 72,
+      "name": "Demo Multi-Series Indicator",
+      "slug": "demo-multi-series",
+      "unit": "Index",
+      "latest_value": 161.57,
+      "latest_date": "2025-12-25",
+      "previous_value": 160.0,
+      "change_percent": 0.98
+    },
+    {
+      "id": 73,
+      "name": "Test Custom Series Type",
+      "slug": "test-custom-series",
+      "unit": "Index",
+      "latest_value": 117.62,
+      "latest_date": "2025-12-25",
+      "previous_value": 115.3,
+      "change_percent": 2.01
+    },
+    {
+      "id": 74,
+      "name": "Test Indicator",
+      "slug": "test-indicator-debug",
+      "unit": "Index",
+      "latest_value": 102.58,
+      "latest_date": "2025-12-25",
+      "previous_value": 101.25,
+      "change_percent": 1.31
+    },
+    {
+      "id": 75,
+      "name": "gold-test1",
+      "slug": "gold-test1",
+      "unit": "Index",
+      "latest_value": 26742.0,
+      "latest_date": "2025-12-25",
+      "previous_value": 27225.7,
+      "change_percent": -1.78
+    },
+    {
+      "id": 76,
+      "name": "silver-price",
+      "slug": "silver-price",
+      "unit": "Index",
+      "latest_value": 128.47,
+      "latest_date": "2025-12-25",
+      "previous_value": 130.1,
+      "change_percent": -1.25
+    },
+    {
+      "id": 77,
+      "name": "thotakoora",
+      "slug": "thotakoora-price",
+      "unit": "Index",
+      "latest_value": 131.28,
+      "latest_date": "2025-12-25",
+      "previous_value": 130.1,
+      "change_percent": 0.91
+    },
+    {
+      "id": 78,
+      "name": "pushpa",
+      "slug": "pushpa-monthly",
+      "unit": "Index",
+      "latest_value": 127.38,
+      "latest_date": "2025-12-25",
+      "previous_value": 130.1,
+      "change_percent": -2.09
+    },
+    {
+      "id": 79,
+      "name": "amul-price",
+      "slug": "amul-price",
+      "unit": "Index",
+      "latest_value": 129.4,
+      "latest_date": "2025-12-25",
+      "previous_value": 130.1,
+      "change_percent": -0.54
+    },
+    {
+      "id": 81,
+      "name": "jujj-test",
+      "slug": "jujj-test",
+      "unit": "Index",
+      "latest_value": 130.1,
+      "latest_date": "2025-12-01",
+      "previous_value": 128.4,
+      "change_percent": 1.32
+    }
+  ]
+}

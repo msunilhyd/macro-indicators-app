@@ -1,0 +1,109 @@
+{
+  "name": "Commodities",
+  "slug": "commodities",
+  "description": "Agricultural and industrial commodity prices",
+  "id": 4,
+  "display_order": 4,
+  "indicators": [
+    {
+      "id": 21,
+      "name": "Coffee",
+      "slug": "coffee",
+      "unit": "Value",
+      "latest_value": 0.608,
+      "latest_date": "2025-12-30",
+      "previous_value": 11628.6,
+      "change_percent": -99.99
+    },
+    {
+      "id": 22,
+      "name": "Copper",
+      "slug": "copper",
+      "unit": "Value",
+      "latest_value": 4.81,
+      "latest_date": "2025-12-30",
+      "previous_value": 33.36,
+      "change_percent": -85.58
+    },
+    {
+      "id": 23,
+      "name": "Corn",
+      "slug": "corn",
+      "unit": "Value",
+      "latest_value": 377.3771,
+      "latest_date": "2025-12-30",
+      "previous_value": -99.05,
+      "change_percent": 481.0
+    },
+    {
+      "id": 24,
+      "name": "Cotton",
+      "slug": "cotton",
+      "unit": "Value",
+      "latest_value": 0.6564,
+      "latest_date": "2025-12-30",
+      "previous_value": -7.35,
+      "change_percent": 108.93
+    },
+    {
+      "id": 25,
+      "name": "Lumber",
+      "slug": "lumber",
+      "unit": "Value",
+      "latest_value": 593.93,
+      "latest_date": "2025-12-30",
+      "previous_value": 2.36,
+      "change_percent": 25066.53
+    },
+    {
+      "id": 26,
+      "name": "Oats",
+      "slug": "oats",
+      "unit": "Value",
+      "latest_value": 2.9551,
+      "latest_date": "2025-12-30",
+      "previous_value": -15.87,
+      "change_percent": 118.62
+    },
+    {
+      "id": 27,
+      "name": "Soybean",
+      "slug": "soybean",
+      "unit": "Value",
+      "latest_value": 10.3905,
+      "latest_date": "2025-12-30",
+      "previous_value": 6.51,
+      "change_percent": 59.61
+    },
+    {
+      "id": 28,
+      "name": "Soybean Oil",
+      "slug": "soybean-oil",
+      "unit": "USD",
+      "latest_value": 0.73,
+      "latest_date": "2025-12-25",
+      "previous_value": 0.7311,
+      "change_percent": -0.15
+    },
+    {
+      "id": 29,
+      "name": "Sugar",
+      "slug": "sugar",
+      "unit": "Value",
+      "latest_value": 0.1703,
+      "latest_date": "2025-12-30",
+      "previous_value": -23.02,
+      "change_percent": 100.74
+    },
+    {
+      "id": 30,
+      "name": "Wheat",
+      "slug": "wheat",
+      "unit": "Value",
+      "latest_value": 6.2619,
+      "latest_date": "2025-12-30",
+      "previous_value": -11.02,
+      "change_percent": 156.82
+    }
+  ]
+}
