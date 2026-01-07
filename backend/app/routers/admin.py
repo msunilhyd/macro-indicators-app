@@ -383,17 +383,7 @@ def collect_daily_data(
     live_value = scrape_live_value(scrape_url, html_selector)
     
     if live_value is None:
-        # Fallback: generate realistic value
-        latest_data = db.query(DataPoint).filter(
-            DataPoint.indicator_id == indicator.id
-        ).order_by(DataPoint.date.desc()).first()
-        
-        if latest_data:
-            import random
-            variation = random.uniform(-0.02, 0.02)
-            live_value = round(latest_data.value * (1 + variation), 2)
-        else:
-            live_value = 100.0
+        raise HTTPException(status_code=400, detail="Failed to scrape data from source")
     
     # Check if data for today already exists
     today = date.today()
@@ -564,17 +554,14 @@ def collect_all_indicators_data(
                 scraped_value = scrape_live_value(indicator.scrape_url, indicator.html_selector)
             
             if scraped_value is None:
-                # Generate realistic value
-                latest_data = db.query(DataPoint).filter(
-                    DataPoint.indicator_id == indicator.id
-                ).order_by(DataPoint.date.desc()).first()
-                
-                if latest_data:
-                    import random
-                    variation = random.uniform(-0.03, 0.03)
-                    scraped_value = round(latest_data.value * (1 + variation), 2)
-                else:
-                    scraped_value = 100.0
+                results.append({
+                    "indicator": indicator.name,
+                    "status": "failed",
+                    "error": "Failed to scrape data from source",
+                    "date": today.isoformat()
+                })
+                failed += 1
+                continue
             
             # Insert new data point
             new_data_point = DataPoint(
