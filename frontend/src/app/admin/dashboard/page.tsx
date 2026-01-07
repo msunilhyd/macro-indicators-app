@@ -15,6 +15,7 @@ interface AdminStats {
     category: string;
     data_points: number;
     date_range: string | null;
+    display_order: number;
   }>;
 }
 
@@ -24,6 +25,7 @@ export default function AdminDashboard() {
   const [showUpload, setShowUpload] = useState(false);
   const [showCreateNew, setShowCreateNew] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showReorder, setShowReorder] = useState(false);
   const [selectedIndicator, setSelectedIndicator] = useState('');
   const [selectedIndicatorSeries, setSelectedIndicatorSeries] = useState<Array<{series_type: string, label: string}>>([]);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -34,6 +36,8 @@ export default function AdminDashboard() {
   const [isNewSeries, setIsNewSeries] = useState(true);
   const [editingIndicator, setEditingIndicator] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [reorderedIndicators, setReorderedIndicators] = useState<Array<any>>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
   
   // New indicator form
   const [newIndicator, setNewIndicator] = useState({
@@ -74,6 +78,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadStats();
   }, []);
+
+  useEffect(() => {
+    if (stats?.indicators) {
+      setReorderedIndicators([...stats.indicators]);
+    }
+  }, [stats]);
 
   const loadStats = async () => {
     const token = getToken();
@@ -375,6 +385,78 @@ export default function AdminDashboard() {
     setShowCreateNew(false);
   };
 
+  const handleDownload = async (slug: string, seriesType: string = 'historical') => {
+    const token = getToken();
+    const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/download-csv/${slug}?admin_token=${token}&series_type=${seriesType}`;
+    
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${slug}_${seriesType}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        document.body.removeChild(a);
+      } else {
+        setUploadStatus('❌ Error downloading file');
+      }
+    } catch (error) {
+      setUploadStatus('❌ Error downloading file');
+    }
+  };
+
+  const moveIndicator = (index: number, direction: 'up' | 'down') => {
+    const newIndicators = [...reorderedIndicators];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < newIndicators.length) {
+      [newIndicators[index], newIndicators[targetIndex]] = [newIndicators[targetIndex], newIndicators[index]];
+      setReorderedIndicators(newIndicators);
+    }
+  };
+
+  const saveOrder = async () => {
+    const token = getToken();
+    const orderData = reorderedIndicators.map((ind, idx) => ({
+      slug: ind.slug,
+      display_order: idx
+    }));
+
+    setIsSavingOrder(true);
+    setUploadStatus('⏳ Saving order...');
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/reorder-indicators?admin_token=${token}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        }
+      );
+
+      if (response.ok) {
+        setUploadStatus('✅ Order saved successfully');
+        setShowReorder(false);
+        loadStats();
+        setTimeout(() => setUploadStatus(''), 3000);
+      } else {
+        const error = await response.json();
+        setUploadStatus(`❌ Error: ${error.detail}`);
+      }
+    } catch (error) {
+      setUploadStatus('❌ Error saving order');
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     router.push('/admin');
@@ -486,6 +568,7 @@ export default function AdminDashboard() {
                   setShowCreateNew(!showCreateNew);
                   setShowUpload(false);
                   setShowDelete(false);
+                  setShowReorder(false);
                 }}
                 className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
               >
@@ -496,6 +579,7 @@ export default function AdminDashboard() {
                   setShowUpload(!showUpload);
                   setShowCreateNew(false);
                   setShowDelete(false);
+                  setShowReorder(false);
                 }}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
@@ -503,9 +587,24 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => {
+                  setShowReorder(!showReorder);
+                  setShowUpload(false);
+                  setShowCreateNew(false);
+                  setShowDelete(false);
+                  if (!showReorder && stats?.indicators) {
+                    setReorderedIndicators([...stats.indicators]);
+                  }
+                }}
+                className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+              >
+                {showReorder ? 'Cancel' : 'Reorder'}
+              </button>
+              <button
+                onClick={() => {
                   setShowDelete(!showDelete);
                   setShowUpload(false);
                   setShowCreateNew(false);
+                  setShowReorder(false);
                 }}
                 className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
               >
@@ -1030,6 +1129,70 @@ export default function AdminDashboard() {
               )}
             </div>
           )}
+
+          {showReorder && (
+            <div className="space-y-4 border-t pt-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Reorder Indicators</h3>
+                <button
+                  onClick={saveOrder}
+                  disabled={isSavingOrder}
+                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isSavingOrder && (
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  {isSavingOrder ? 'Reordering...' : 'Save Order'}
+                </button>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
+                💡 Use the ↑ ↓ arrows to reorder indicators. The order will be reflected throughout the site.
+              </div>
+
+              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                {reorderedIndicators.map((indicator, index) => (
+                  <div
+                    key={indicator.slug}
+                    className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100"
+                  >
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="text-sm font-medium text-gray-500 w-8">#{index + 1}</div>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{indicator.name}</div>
+                        <div className="text-sm text-gray-500">{indicator.category} • {indicator.data_points.toLocaleString()} points</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => moveIndicator(index, 'up')}
+                        disabled={index === 0}
+                        className="p-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move up"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => moveIndicator(index, 'down')}
+                        disabled={index === reorderedIndicators.length - 1}
+                        className="p-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move down"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Indicators Table */}
@@ -1158,12 +1321,24 @@ export default function AdminDashboard() {
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => startEdit(indicator)}
-                          className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                        >
-                          Edit
-                        </button>
+                        <div className="flex gap-2 items-center">
+                          <button
+                            onClick={() => startEdit(indicator)}
+                            className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDownload(indicator.slug)}
+                            className="text-green-600 hover:text-green-800 text-xs font-medium flex items-center gap-1"
+                            title="Download CSV"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

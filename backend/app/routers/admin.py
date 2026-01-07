@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Form
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from typing import List, Optional
@@ -40,8 +41,8 @@ def get_admin_stats(
     categories = db.query(Category.slug).all()
     category_slugs = [cat.slug for cat in categories]
     
-    # Get all indicators with details
-    indicators = db.query(Indicator).all()
+    # Get all indicators with details, ordered by display_order
+    indicators = db.query(Indicator).order_by(Indicator.display_order, Indicator.id).all()
     indicator_list = []
     
     for indicator in indicators:
@@ -69,6 +70,7 @@ def get_admin_stats(
             "category": indicator.category.name if indicator.category else "Unknown",
             "data_points": data_point_count,
             "date_range": date_range,
+            "display_order": indicator.display_order,
         })
     
     return {
@@ -156,6 +158,53 @@ async def upload_csv(
         "updated": updated_count,
         "series_type": series_type
     }
+
+
+@router.get("/download-csv/{indicator_slug}")
+def download_indicator_data(
+    indicator_slug: str,
+    series_type: str = Query("historical"),
+    admin_token: str = Depends(verify_admin_token),
+    db: Session = Depends(get_db)
+):
+    """Download all data for an indicator as CSV"""
+    # Find the indicator
+    indicator = db.query(Indicator).filter(Indicator.slug == indicator_slug).first()
+    if not indicator:
+        raise HTTPException(status_code=404, detail="Indicator not found")
+    
+    # Get all data points for the indicator
+    data_points = db.query(DataPoint).filter(
+        and_(
+            DataPoint.indicator_id == indicator.id,
+            DataPoint.series_type == series_type
+        )
+    ).order_by(DataPoint.date).all()
+    
+    if not data_points:
+        raise HTTPException(status_code=404, detail="No data found for this indicator")
+    
+    # Create DataFrame
+    df = pd.DataFrame([
+        {
+            "date": dp.date.strftime('%Y-%m-%d'),
+            "value": dp.value
+        }
+        for dp in data_points
+    ])
+    
+    # Convert to CSV
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+    
+    # Return as downloadable file
+    filename = f"{indicator_slug}_{series_type}.csv"
+    return StreamingResponse(
+        io.BytesIO(csv_buffer.getvalue().encode()),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 @router.post("/create-indicator-from-csv")
@@ -443,6 +492,33 @@ def configure_indicator_scraping(
         "scrape_url": scrape_url,
         "html_selector": html_selector
     }
+
+
+@router.post("/reorder-indicators")
+def reorder_indicators(
+    indicator_orders: List[dict],
+    admin_token: str = Depends(verify_admin_token),
+    db: Session = Depends(get_db)
+):
+    """Update display order for multiple indicators
+    
+    Expected format: [{"slug": "indicator-slug", "display_order": 0}, ...]
+    """
+    try:
+        for item in indicator_orders:
+            indicator = db.query(Indicator).filter(Indicator.slug == item['slug']).first()
+            if indicator:
+                indicator.display_order = item['display_order']
+        
+        db.commit()
+        
+        return {
+            "message": "Indicator order updated successfully",
+            "updated_count": len(indicator_orders)
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Error updating order: {str(e)}")
 
 
 @router.get("/indicators-with-scraping")
