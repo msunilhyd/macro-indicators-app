@@ -490,7 +490,7 @@ export default function AdminDashboard() {
       }));
 
       const token = localStorage.getItem('admin_token');
-      const response = await fetch(`/api/admin/reorder-indicators?admin_token=${token}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/reorder-indicators?admin_token=${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
