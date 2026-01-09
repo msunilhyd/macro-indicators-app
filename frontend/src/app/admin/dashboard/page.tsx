@@ -38,6 +38,8 @@ export default function AdminDashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [reorderedIndicators, setReorderedIndicators] = useState<Array<any>>([]);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [reorderCategory, setReorderCategory] = useState<string>('all');
+  const [rankEdits, setRankEdits] = useState<{[key: string]: number}>({});
   
   // New indicator form
   const [newIndicator, setNewIndicator] = useState({
@@ -84,6 +86,19 @@ export default function AdminDashboard() {
       setReorderedIndicators([...stats.indicators]);
     }
   }, [stats]);
+
+  // Filter indicators by category for reordering
+  const getFilteredIndicators = () => {
+    if (reorderCategory === 'all') {
+      return reorderedIndicators;
+    }
+    return reorderedIndicators.filter(ind => ind.category === formatCategoryName(reorderCategory));
+  };
+
+  // Format category slug to display name
+  const formatCategoryName = (slug: string) => {
+    return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
 
   const loadStats = async () => {
     const token = getToken();
@@ -409,13 +424,99 @@ export default function AdminDashboard() {
     }
   };
 
-  const moveIndicator = (index: number, direction: 'up' | 'down') => {
-    const newIndicators = [...reorderedIndicators];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    
-    if (targetIndex >= 0 && targetIndex < newIndicators.length) {
-      [newIndicators[index], newIndicators[targetIndex]] = [newIndicators[targetIndex], newIndicators[index]];
-      setReorderedIndicators(newIndicators);
+
+
+  const handleRankChange = (slug: string, newRank: number) => {
+    // Only update if the value is a valid number
+    if (!isNaN(newRank) && newRank > 0) {
+      setRankEdits({
+        ...rankEdits,
+        [slug]: newRank
+      });
+    } else if (isNaN(newRank)) {
+      // Remove the edit if invalid
+      const newEdits = { ...rankEdits };
+      delete newEdits[slug];
+      setRankEdits(newEdits);
+    }
+  };
+
+  const applyRankChanges = async () => {
+    try {
+      setUploadStatus('⏳ Saving rank changes...');
+      
+      // Work with all indicators, not just filtered ones
+      const allIndicators = stats?.indicators || [];
+      
+      // Separate indicators into those with rank edits and those without
+      const indicatorsWithEdits = allIndicators
+        .filter(ind => rankEdits[ind.slug] !== undefined)
+        .map(ind => ({
+          ...ind,
+          newRank: rankEdits[ind.slug]
+        }));
+      
+      const indicatorsWithoutEdits = allIndicators
+        .filter(ind => rankEdits[ind.slug] === undefined)
+        .map((ind, index) => ({
+          ...ind,
+          currentRank: index + 1
+        }));
+      
+      // Create final ordered list
+      const finalOrder = [...allIndicators];
+      
+      // Sort indicators with edits by their new rank
+      indicatorsWithEdits.sort((a, b) => a.newRank - b.newRank);
+      
+      // Remove all edited indicators from their current positions
+      indicatorsWithEdits.forEach(editedInd => {
+        const currentIndex = finalOrder.findIndex(ind => ind.slug === editedInd.slug);
+        if (currentIndex !== -1) {
+          finalOrder.splice(currentIndex, 1);
+        }
+      });
+      
+      // Insert each edited indicator at its new position
+      indicatorsWithEdits.forEach(editedInd => {
+        const targetIndex = editedInd.newRank - 1; // Convert 1-based to 0-based
+        finalOrder.splice(targetIndex, 0, editedInd);
+      });
+      
+      // Create the reorder payload with updated display_order values
+      const reorderData = finalOrder.map((item, index) => ({
+        slug: item.slug,
+        display_order: index
+      }));
+
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch(`/api/admin/reorder-indicators?admin_token=${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reorderData)
+      });
+
+      if (response.ok) {
+        setUploadStatus('✅ Indicator ranks updated successfully!');
+        setRankEdits({});
+        // Refresh data to show new ordering
+        const token = localStorage.getItem('admin_token');
+        const updatedStats = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/stats?admin_token=${token}`
+        ).then(res => res.json());
+        setStats(updatedStats);
+        // Close reorder section to show the new sorted table
+        setShowReorder(false);
+        // Clear message after 3 seconds
+        setTimeout(() => setUploadStatus(''), 3000);
+      } else {
+        setUploadStatus('❌ Failed to update indicator ranks');
+      }
+    } catch (error) {
+      console.error('Error updating ranks:', error);
+      setUploadStatus('❌ An error occurred while updating ranks');
     }
   };
 
@@ -479,16 +580,10 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <div className="flex gap-4">
-              <a href="/" className="text-blue-600 hover:text-blue-800">
-                View Site
+            <div className="flex gap-4 items-center">
+              <a href="/" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                ← Back to Home
               </a>
-              <button
-                onClick={handleLogout}
-                className="text-red-600 hover:text-red-800"
-              >
-                Logout
-              </button>
             </div>
           </div>
         </div>
@@ -507,25 +602,25 @@ export default function AdminDashboard() {
             }`}>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  {isUploading && (
+                  {(isUploading || uploadStatus.includes('⏳')) && (
                     <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   )}
-                  {!isUploading && (uploadStatus.includes('Success') || uploadStatus.includes('deleted') || uploadStatus.includes('updated')) && (
+                  {!isUploading && !uploadStatus.includes('⏳') && (uploadStatus.includes('Success') || uploadStatus.includes('deleted') || uploadStatus.includes('updated')) && (
                     <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   )}
-                  {!isUploading && uploadStatus.includes('❌') && (
+                  {!isUploading && !uploadStatus.includes('⏳') && uploadStatus.includes('❌') && (
                     <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   )}
                   <span className="font-medium">{uploadStatus}</span>
                 </div>
-                {!isUploading && (
+                {!isUploading && !uploadStatus.includes('⏳') && (
                   <button 
                     onClick={() => setUploadStatus('')}
                     className="text-gray-500 hover:text-gray-700 font-bold text-lg"
@@ -553,7 +648,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500">Total Data Points</h3>
             <p className="text-3xl font-bold text-gray-900 mt-2">
-              {stats?.total_data_points.toLocaleString()}
+              {stats?.total_data_points?.toLocaleString() || '0'}
             </p>
           </div>
         </div>
@@ -1132,61 +1227,69 @@ export default function AdminDashboard() {
 
           {showReorder && (
             <div className="space-y-4 border-t pt-4">
-              <div className="flex justify-between items-center mb-4">
+              <div className="mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Reorder Indicators</h3>
-                <button
-                  onClick={saveOrder}
-                  disabled={isSavingOrder}
-                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {isSavingOrder && (
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  )}
-                  {isSavingOrder ? 'Reordering...' : 'Save Order'}
-                </button>
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
-                💡 Use the ↑ ↓ arrows to reorder indicators. The order will be reflected throughout the site.
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-blue-800">💡 Edit rank numbers to reorder indicators. The order will be reflected throughout the site.</span>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-blue-900 mb-2">Filter by Category</label>
+                  <select
+                    value={reorderCategory}
+                    onChange={(e) => {
+                      setReorderCategory(e.target.value);
+                      setRankEdits({});
+                    }}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Categories (Global Order)</option>
+                    {stats?.categories?.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {formatCategoryName(cat)}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-blue-700 mt-1">
+                    {reorderCategory === 'all' 
+                      ? 'Reordering all indicators across all categories' 
+                      : `Reordering only ${formatCategoryName(reorderCategory)} indicators`}
+                  </p>
+                </div>
+                {Object.keys(rankEdits).length > 0 && (
+                  <button
+                    onClick={applyRankChanges}
+                    className="mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium"
+                  >
+                    Apply Rank Changes ({Object.keys(rankEdits).length})
+                  </button>
+                )}
               </div>
 
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {reorderedIndicators.map((indicator, index) => (
+                {getFilteredIndicators().map((indicator, index) => (
                   <div
                     key={indicator.slug}
                     className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100"
                   >
                     <div className="flex items-center gap-4 flex-1">
-                      <div className="text-sm font-medium text-gray-500 w-8">#{index + 1}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-500">Rank:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max={getFilteredIndicators().length}
+                          value={isNaN(rankEdits[indicator.slug]) ? (index + 1) : (rankEdits[indicator.slug] ?? (index + 1))}
+                          onChange={(e) => handleRankChange(indicator.slug, parseInt(e.target.value) || NaN)}
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{indicator.name}</div>
                         <div className="text-sm text-gray-500">{indicator.category} • {indicator.data_points.toLocaleString()} points</div>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => moveIndicator(index, 'up')}
-                        disabled={index === 0}
-                        className="p-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move up"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => moveIndicator(index, 'down')}
-                        disabled={index === reorderedIndicators.length - 1}
-                        className="p-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move down"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
                     </div>
                   </div>
                 ))}
@@ -1197,13 +1300,24 @@ export default function AdminDashboard() {
 
         {/* Indicators Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-xl font-bold text-gray-900">All Indicators</h2>
+            {Object.keys(rankEdits).length > 0 && (
+              <button
+                onClick={applyRankChanges}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+              >
+                Save Rank Changes ({Object.keys(rankEdits).length})
+              </button>
+            )}
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rank
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
@@ -1222,8 +1336,25 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {stats?.indicators.map((indicator) => (
+                {stats?.indicators?.map((indicator, index) => (
                   <tr key={indicator.id} className={editingIndicator === indicator.slug ? 'bg-blue-50' : ''}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {showReorder ? (
+                        <input
+                          type="number"
+                          min="1"
+                          max={stats?.indicators.length || 1}
+                          value={isNaN(rankEdits[indicator.slug]) ? (index + 1) : (rankEdits[indicator.slug] ?? (index + 1))}
+                          onChange={(e) => handleRankChange(indicator.slug, parseInt(e.target.value) || NaN)}
+                          className="w-14 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          title="Edit rank to reorder"
+                        />
+                      ) : (
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                          {index + 1}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <a 
                         href={`/indicator/${indicator.slug}`}

@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Menu, X, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, TrendingUp, LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 
 const categories = [
   { name: 'Market Indexes', slug: 'market-indexes' },
@@ -16,6 +17,21 @@ const categories = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is logged in as admin
+    const token = localStorage.getItem('admin_token');
+    setIsAdmin(!!token);
+  }, [pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token');
+    setIsAdmin(false);
+    router.push('/admin');
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -38,12 +54,25 @@ export default function Navbar() {
                 {cat.name}
               </Link>
             ))}
-            <Link
-              href="/admin"
-              className="ml-4 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors border-l border-gray-200"
-            >
-              Admin
-            </Link>
+            {isAdmin ? (
+              <div className="ml-4 flex items-center gap-2 border-l border-gray-200 pl-4">
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors flex items-center gap-1"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/admin"
+                className="ml-4 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors border-l border-gray-200"
+              >
+                Admin
+              </Link>
+            )}
           </div>
 
           <div className="md:hidden flex items-center">
@@ -70,6 +99,27 @@ export default function Navbar() {
                 {cat.name}
               </Link>
             ))}
+            {isAdmin ? (
+              <>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/admin"
+                className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
           </div>
         </div>
       )}

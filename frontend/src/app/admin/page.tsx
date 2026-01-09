@@ -1,12 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLogin() {
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if already logged in
+    const existingToken = localStorage.getItem('admin_token');
+    if (existingToken) {
+      // Verify token is still valid
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/stats?admin_token=${existingToken}`)
+        .then(response => {
+          if (response.ok) {
+            // Token is valid, redirect to dashboard
+            router.push('/admin/dashboard');
+          } else {
+            // Token is invalid, remove it
+            localStorage.removeItem('admin_token');
+          }
+        })
+        .catch(() => {
+          // On error, stay on login page
+          localStorage.removeItem('admin_token');
+        });
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

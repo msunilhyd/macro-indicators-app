@@ -43,32 +43,41 @@ def get_admin_stats(
     
     # Get all indicators with details, ordered by display_order
     indicators = db.query(Indicator).order_by(Indicator.display_order, Indicator.id).all()
-    indicator_list = []
     
+    # Optimize: Get data point stats for all indicators in one query
+    data_stats = db.query(
+        DataPoint.indicator_id,
+        func.count(DataPoint.id).label('count'),
+        func.min(DataPoint.date).label('min_date'),
+        func.max(DataPoint.date).label('max_date')
+    ).group_by(DataPoint.indicator_id).all()
+    
+    # Create a lookup dictionary for faster access
+    stats_dict = {
+        stat.indicator_id: {
+            'count': stat.count,
+            'min_date': stat.min_date,
+            'max_date': stat.max_date
+        }
+        for stat in data_stats
+    }
+    
+    indicator_list = []
     for indicator in indicators:
-        # Get data point count for this indicator
-        data_point_count = db.query(func.count(DataPoint.id)).filter(
-            DataPoint.indicator_id == indicator.id
-        ).scalar()
+        # Get stats from the dictionary
+        stats = stats_dict.get(indicator.id, {'count': 0, 'min_date': None, 'max_date': None})
         
-        # Get date range
+        # Format date range
         date_range = None
-        min_date = db.query(func.min(DataPoint.date)).filter(
-            DataPoint.indicator_id == indicator.id
-        ).scalar()
-        max_date = db.query(func.max(DataPoint.date)).filter(
-            DataPoint.indicator_id == indicator.id
-        ).scalar()
-        
-        if min_date and max_date:
-            date_range = f"{min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}"
+        if stats['min_date'] and stats['max_date']:
+            date_range = f"{stats['min_date'].strftime('%Y-%m-%d')} to {stats['max_date'].strftime('%Y-%m-%d')}"
         
         indicator_list.append({
             "id": indicator.id,
             "name": indicator.name,
             "slug": indicator.slug,
             "category": indicator.category.name if indicator.category else "Unknown",
-            "data_points": data_point_count,
+            "data_points": stats['count'],
             "date_range": date_range,
             "display_order": indicator.display_order,
         })

@@ -43,6 +43,9 @@ export default async function CategoryPage({ params }: PageProps) {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                #
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Indicator
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -57,12 +60,17 @@ export default async function CategoryPage({ params }: PageProps) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {category.indicators.map((indicator) => {
+            {category.indicators.map((indicator, index) => {
               const isPositive = indicator.change_percent !== null && indicator.change_percent > 0;
               const isNegative = indicator.change_percent !== null && indicator.change_percent < 0;
 
               return (
                 <tr key={indicator.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                      {index + 1}
+                    </span>
+                  </td>
                   <td className="px-6 py-4">
                     <Link
                       href={`/indicator/${indicator.slug}`}

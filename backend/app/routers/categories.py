@@ -22,8 +22,13 @@ def get_category(slug: str, db: Session = Depends(get_db)):
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     
+    # Get indicators ordered by display_order
+    ordered_indicators = db.query(Indicator).filter(
+        Indicator.category_id == category.id
+    ).order_by(Indicator.display_order, Indicator.id).all()
+    
     indicators_with_summary = []
-    for indicator in category.indicators:
+    for indicator in ordered_indicators:
         latest = db.query(DataPoint).filter(
             DataPoint.indicator_id == indicator.id
         ).order_by(DataPoint.date.desc()).first()
