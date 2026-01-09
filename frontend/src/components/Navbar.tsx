@@ -56,6 +56,12 @@ export default function Navbar() {
             ))}
             {isAdmin ? (
               <div className="ml-4 flex items-center gap-2 border-l border-gray-200 pl-4">
+                <Link
+                  href="/admin/dashboard"
+                  className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                >
+                  Admin Dashboard
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors flex items-center gap-1"
@@ -101,6 +107,13 @@ export default function Navbar() {
             ))}
             {isAdmin ? (
               <>
+                <Link
+                  href="/admin/dashboard"
+                  className="block px-3 py-2 text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Admin Dashboard
+                </Link>
                 <button
                   onClick={() => {
                     handleLogout();
