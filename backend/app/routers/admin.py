@@ -129,8 +129,20 @@ async def upload_csv(
     
     for _, row in df.iterrows():
         try:
-            # Parse date
-            date_obj = pd.to_datetime(row['date']).date()
+            # Parse date - support multiple formats: yyyy-mm-dd, yyyy-mm, yyyy
+            date_str = str(row['date']).strip()
+            
+            # Try to parse different date formats
+            if len(date_str) == 4 and date_str.isdigit():
+                # Format: yyyy (e.g., "2024")
+                date_obj = datetime.strptime(date_str, '%Y').date()
+            elif len(date_str) == 7 and date_str[4] == '-':
+                # Format: yyyy-mm (e.g., "2024-01")
+                date_obj = datetime.strptime(date_str, '%Y-%m').date()
+            else:
+                # Format: yyyy-mm-dd or other pandas-parseable format
+                date_obj = pd.to_datetime(date_str).date()
+            
             value = float(row['value'])
             
             # Check if data point already exists
