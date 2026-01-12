@@ -111,5 +111,11 @@ export function formatValue(value: number | null, unit: string | null): string {
 export function formatDate(dateStr: string | null): string {
   if (!dateStr) return 'N/A';
   const date = new Date(dateStr);
+  
+  // If date is January 1st, show only the year (year-only data)
+  if (date.getMonth() === 0 && date.getDate() === 1) {
+    return date.getFullYear().toString();
+  }
+  
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }

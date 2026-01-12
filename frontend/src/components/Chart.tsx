@@ -19,14 +19,19 @@ interface ChartProps {
 }
 
 export default function Chart({ data, name, unit }: ChartProps) {
-  const chartData = data.map((dp) => ({
-    date: new Date(dp.date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-    }),
-    value: dp.value,
-    fullDate: dp.date,
-  }));
+  const chartData = data.map((dp) => {
+    const date = new Date(dp.date);
+    // If date is January 1st, show only the year (year-only data)
+    const formattedDate = date.getMonth() === 0 && date.getDate() === 1
+      ? date.getFullYear().toString()
+      : date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    
+    return {
+      date: formattedDate,
+      value: dp.value,
+      fullDate: dp.date,
+    };
+  });
 
   const formatYAxis = (value: number) => {
     if (unit === '%') return `${value}%`;
