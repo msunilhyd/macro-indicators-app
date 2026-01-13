@@ -68,7 +68,7 @@ export default function AdminLogin() {
               id="token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
               placeholder="Enter admin token"
               required
             />

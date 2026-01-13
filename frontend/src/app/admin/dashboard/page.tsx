@@ -721,7 +721,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newIndicator.name}
                     onChange={(e) => setNewIndicator({...newIndicator, name: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     placeholder="e.g., Gold Price"
                     required
                   />
@@ -735,7 +735,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newIndicator.slug}
                     onChange={(e) => setNewIndicator({...newIndicator, slug: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     placeholder="e.g., gold-price"
                     required
                   />
@@ -748,7 +748,7 @@ export default function AdminDashboard() {
                   <select
                     value={newIndicator.category}
                     onChange={(e) => setNewIndicator({...newIndicator, category: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     required
                   >
                     {stats?.categories.map((cat) => (
@@ -767,7 +767,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newIndicator.unit}
                     onChange={(e) => setNewIndicator({...newIndicator, unit: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     placeholder="e.g., USD, Index, %"
                   />
                 </div>
@@ -779,7 +779,7 @@ export default function AdminDashboard() {
                   <select
                     value={newIndicator.frequency}
                     onChange={(e) => setNewIndicator({...newIndicator, frequency: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   >
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
@@ -796,7 +796,7 @@ export default function AdminDashboard() {
                   <textarea
                     value={newIndicator.description}
                     onChange={(e) => setNewIndicator({...newIndicator, description: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     rows={3}
                     placeholder="Brief description of the indicator..."
                   />
@@ -810,7 +810,7 @@ export default function AdminDashboard() {
                     type="url"
                     value={newIndicator.scrape_url}
                     onChange={(e) => setNewIndicator({...newIndicator, scrape_url: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     placeholder="Link to scrape the rate value"
                   />
                 </div>
@@ -823,7 +823,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={newIndicator.html_selector}
                     onChange={(e) => setNewIndicator({...newIndicator, html_selector: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                     placeholder="HTML div"
                   />
                 </div>
@@ -870,7 +870,7 @@ export default function AdminDashboard() {
                             updated[index].series_type = e.target.value;
                             setFileUploads(updated);
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
                         >
                           <option value="historical">Historical</option>
                           <option value="inflation_adjusted">Adjusted for Inflation</option>
@@ -893,7 +893,7 @@ export default function AdminDashboard() {
                               updated[index].custom_series_type = e.target.value;
                               setFileUploads(updated);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
                             placeholder="e.g., quarterly_avg, rolling_12m"
                             required
                           />
@@ -913,7 +913,7 @@ export default function AdminDashboard() {
                             setFileUploads(updated);
                             console.log('File selected:', e.target.files?.[0]?.name);
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
                         />
                         {upload.file && (
                           <p className="text-xs text-green-600 mt-1">
@@ -979,7 +979,7 @@ export default function AdminDashboard() {
                     setIsNewSeries(true);
                     setUploadSeriesType('historical');
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   required
                 >
                   <option value="">Choose an indicator...</option>
@@ -1022,7 +1022,7 @@ export default function AdminDashboard() {
                           type="url"
                           value={editForm.scrape_url}
                           onChange={(e) => setEditForm({...editForm, scrape_url: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
                           placeholder="https://example.com/gold-price"
                         />
                       </div>
@@ -1033,7 +1033,7 @@ export default function AdminDashboard() {
                           type="text"
                           value={editForm.html_selector}
                           onChange={(e) => setEditForm({...editForm, html_selector: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
                           placeholder=".price-value or [data-test='price']"
                         />
                       </div>
@@ -1093,7 +1093,7 @@ export default function AdminDashboard() {
                       <select
                         value={uploadSeriesType}
                         onChange={(e) => setUploadSeriesType(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                         required
                       >
                         {selectedIndicatorSeries.map((series) => (
@@ -1107,7 +1107,7 @@ export default function AdminDashboard() {
                         <select
                           value={uploadSeriesType}
                           onChange={(e) => setUploadSeriesType(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                           required
                         >
                           <option value="historical">Historical</option>
@@ -1132,7 +1132,7 @@ export default function AdminDashboard() {
                         type="text"
                         value={customUploadSeriesType}
                         onChange={(e) => setCustomUploadSeriesType(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                         placeholder="e.g., quarterly_avg, rolling_12m"
                         required
                       />
@@ -1150,7 +1150,7 @@ export default function AdminDashboard() {
                       type="file"
                       accept=".csv"
                       onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                       required
                     />
                   </div>
@@ -1184,7 +1184,7 @@ export default function AdminDashboard() {
                 <select
                   value={deleteConfirm || ''}
                   onChange={(e) => setDeleteConfirm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                 >
                   <option value="">Choose an indicator...</option>
                   {stats?.indicators.map((ind) => (
@@ -1243,7 +1243,7 @@ export default function AdminDashboard() {
                       setReorderCategory(e.target.value);
                       setRankEdits({});
                     }}
-                    className="w-full px-3 py-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500 text-gray-900"
                   >
                     <option value="all">All Categories (Global Order)</option>
                     {stats?.categories?.map((cat) => (
