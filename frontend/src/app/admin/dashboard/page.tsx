@@ -1065,7 +1065,7 @@ export default function AdminDashboard() {
                             }}
                             className="mr-2"
                           />
-                          <span className="text-sm">Add a new series type</span>
+                          <span className="text-sm text-gray-900">Add a new series type</span>
                         </label>
                         {selectedIndicatorSeries.length > 0 && (
                           <label className="flex items-center">
@@ -1078,7 +1078,7 @@ export default function AdminDashboard() {
                               }}
                               className="mr-2"
                             />
-                            <span className="text-sm">Update an existing series type (replace data)</span>
+                            <span className="text-sm text-gray-900">Update an existing series type (replace data)</span>
                           </label>
                         )}
                       </div>
