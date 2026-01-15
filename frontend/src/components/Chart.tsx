@@ -20,7 +20,10 @@ interface ChartProps {
 
 export default function Chart({ data, name, unit }: ChartProps) {
   const chartData = data.map((dp) => {
-    const date = new Date(dp.date);
+    // Parse date as local date to avoid timezone issues
+    const [year, month, day] = dp.date.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    
     // If date is January 1st, show only the year (year-only data)
     const formattedDate = date.getMonth() === 0 && date.getDate() === 1
       ? date.getFullYear().toString()

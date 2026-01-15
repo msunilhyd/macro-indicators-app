@@ -85,7 +85,10 @@ export default function ChartWithFilters({ data, name, unit, series = [] }: Char
     }
     
     return dataToChart.map((dp) => {
-      const date = new Date(dp.date);
+      // Parse date as local date to avoid timezone issues
+      const [year, month, day] = dp.date.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      
       // If date is January 1st, show only the year (year-only data)
       const formattedDate = date.getMonth() === 0 && date.getDate() === 1
         ? date.getFullYear().toString()
@@ -154,12 +157,18 @@ export default function ChartWithFilters({ data, name, unit, series = [] }: Char
       {/* Data range info */}
       <div className="text-sm text-gray-500 mb-4">
         Showing {filteredData.length.toLocaleString()} data points
-        {filteredData.length > 0 && (
-          <span>
-            {' '}from {new Date(filteredData[0].date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-            {' '}to {new Date(filteredData[filteredData.length - 1].date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-          </span>
-        )}
+        {filteredData.length > 0 && (() => {
+          const [year1, month1, day1] = filteredData[0].date.split('-').map(Number);
+          const [year2, month2, day2] = filteredData[filteredData.length - 1].date.split('-').map(Number);
+          const startDate = new Date(year1, month1 - 1, day1);
+          const endDate = new Date(year2, month2 - 1, day2);
+          return (
+            <span>
+              {' '}from {startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+              {' '}to {endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+            </span>
+          );
+        })()}
       </div>
 
       {/* Chart */}

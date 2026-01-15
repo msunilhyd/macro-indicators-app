@@ -110,7 +110,10 @@ export function formatValue(value: number | null, unit: string | null): string {
 
 export function formatDate(dateStr: string | null): string {
   if (!dateStr) return 'N/A';
-  const date = new Date(dateStr);
+  
+  // Parse as local date to avoid timezone conversion issues
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   
   // If date is January 1st, show only the year (year-only data)
   if (date.getMonth() === 0 && date.getDate() === 1) {

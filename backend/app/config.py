@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     class Config:
         # Railway uses environment variables directly, not .env files
         # This allows both local .env files and Railway env vars to work
-        env_file = ".env"
+        # Prioritize .env.local for local development, fallback to .env
+        env_file = ".env.local"
         env_file_encoding = 'utf-8'
         case_sensitive = False
 

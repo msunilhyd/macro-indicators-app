@@ -126,11 +126,17 @@ async def upload_csv(
     # Process and insert data
     added_count = 0
     updated_count = 0
+    errors = []
     
-    for _, row in df.iterrows():
+    for idx, row in df.iterrows():
         try:
             # Parse date - support multiple formats: yyyy-mm-dd, yyyy-mm, yyyy
             date_str = str(row['date']).strip()
+            
+            # Handle numeric years (pandas may read as float like 1960.0)
+            if '.' in date_str and date_str.replace('.', '').replace('-', '').isdigit():
+                # Remove decimal part if present (e.g., "1960.0" -> "1960")
+                date_str = date_str.split('.')[0]
             
             # Try to parse different date formats
             if len(date_str) == 4 and date_str.isdigit():
@@ -167,18 +173,25 @@ async def upload_csv(
                 db.add(data_point)
                 added_count += 1
         except Exception as e:
-            # Skip rows with errors
+            # Log error but continue processing
+            errors.append(f"Row {idx}: {str(e)}")
             continue
     
     db.commit()
     
-    return {
+    result = {
         "message": "CSV uploaded successfully",
         "indicator": indicator.name,
         "added": added_count,
         "updated": updated_count,
         "series_type": series_type
     }
+    
+    if errors:
+        result["errors"] = errors[:10]  # Return first 10 errors
+        result["total_errors"] = len(errors)
+    
+    return result
 
 
 @router.get("/download-csv/{indicator_slug}")
@@ -295,11 +308,17 @@ async def create_indicator_from_csv(
     
     # Process and insert data
     added_count = 0
+    errors = []
     
-    for _, row in df.iterrows():
+    for idx, row in df.iterrows():
         try:
             # Parse date - support multiple formats: yyyy-mm-dd, yyyy-mm, yyyy
             date_str = str(row['date']).strip()
+            
+            # Handle numeric years (pandas may read as float like 1960.0)
+            if '.' in date_str and date_str.replace('.', '').replace('-', '').isdigit():
+                # Remove decimal part if present (e.g., "1960.0" -> "1960")
+                date_str = date_str.split('.')[0]
             
             # Try to parse different date formats
             if len(date_str) == 4 and date_str.isdigit():
@@ -323,13 +342,14 @@ async def create_indicator_from_csv(
             db.add(data_point)
             added_count += 1
         except Exception as e:
-            # Skip rows with errors
+            # Log error but continue processing
+            errors.append(f"Row {idx}: {str(e)}")
             continue
     
     db.commit()
     db.refresh(indicator)
     
-    return {
+    result = {
         "message": "Indicator created successfully with data",
         "indicator": {
             "id": indicator.id,
@@ -339,6 +359,12 @@ async def create_indicator_from_csv(
         "data_added": added_count,
         "series_type": series_type
     }
+    
+    if errors:
+        result["errors"] = errors[:10]  # Return first 10 errors
+        result["total_errors"] = len(errors)
+    
+    return result
 
 
 @router.delete("/indicators/{indicator_slug}")
